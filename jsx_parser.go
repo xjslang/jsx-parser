@@ -173,7 +173,6 @@ func ParseJsxExpression(p *parser.Parser, precedence int, next func(*parser.Pars
 					Value: strings.Join(textBuffer, ""),
 				}
 				jsx.Children = append(jsx.Children, text)
-				textBuffer = textBuffer[:0] // clear buffer
 			}
 
 			// Consumir '</'
