@@ -90,10 +90,10 @@ func (jsx *JsxExpression) childrenToString() string {
 	return strings.Join(children, ", ")
 }
 
-func ParseJsxExpression(p *parser.Parser, next func(*parser.Parser) ast.Expression) ast.Expression {
+func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expression {
 	// Solo procesar si encontramos '<' seguido de un identificador
 	if p.CurrentToken.Type != token.LT || p.PeekToken.Type != token.IDENT {
-		return next(p)
+		return next()
 	}
 
 	jsx := &JsxExpression{
