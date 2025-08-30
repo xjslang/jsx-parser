@@ -71,6 +71,25 @@ func main() {
 }
 ```
 
+## Ejemplos
+
+Para ver ejemplos detallados de uso, consulta los **Example functions** incluidos en el código:
+
+```bash
+# Ver todos los ejemplos disponibles
+go test -run Example -v
+
+# Ejecutar un ejemplo específico
+go test -run ExampleParseJsxExpression_nested -v
+```
+
+Los ejemplos cubren:
+- **`ExampleParseJsxExpression`**: Uso básico
+- **`ExampleParseJsxExpression_selfClosing`**: Elementos self-closing  
+- **`ExampleParseJsxExpression_nested`**: Elementos anidados
+- **`ExampleParseJsxExpression_withAttributes`**: JSX con atributos
+- **`ExampleParseJsxExpression_complex`**: Casos complejos
+
 ## Arquitectura
 
 El plugin utiliza el patrón middleware de XJS:
@@ -106,8 +125,19 @@ El plugin utiliza el patrón middleware de XJS:
 ## Testing
 
 ```bash
-cd jsx-parser
+# Ejecutar todos los tests
 go test -v
+
+# Ejecutar solo los tests unitarios
+go test -run TestJsxParser -v
+
+# Ejecutar solo los ejemplos
+go test -run Example -v
+
+# Ver documentación con ejemplos
+go doc .
 ```
 
-El plugin incluye tests comprehensivos que cubren todos los casos de uso implementados.
+El plugin incluye:
+- **Tests unitarios comprehensivos** que cubren todos los casos de uso
+- **Example functions** que sirven como documentación ejecutable y ejemplos de uso

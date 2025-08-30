@@ -1,21 +1,20 @@
 package jsxparser
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/xjslang/xjs/lexer"
 	"github.com/xjslang/xjs/parser"
 )
 
-func TestParser(t *testing.T) {
+func TestJsxParser(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
 		expected string
 	}{
 		{
-			name:     "Basic JSX",
+			name:     "Basic JSX element",
 			input:    `let x = <div>Hello, World!</div>`,
 			expected: `let x = React.createElement("div", null, "Hello,World!")`,
 		},
@@ -48,8 +47,6 @@ func TestParser(t *testing.T) {
 			p.UseExpressionHandler(ParseJsxExpression)
 			ast := p.ParseProgram()
 			result := ast.String()
-
-			fmt.Printf("%s: %s\n", tt.name, result)
 
 			if result != tt.expected {
 				t.Errorf("Expected: %s\nGot: %s", tt.expected, result)
