@@ -29,65 +29,77 @@ type JsxText struct {
 	Value string
 }
 
-func (jt *JsxText) String() string {
+func (jt *JsxText) WriteTo(b *strings.Builder) {
 	// Escapar comillas en el texto
-	escaped := strings.ReplaceAll(jt.Value, "\"", "\\\"")
-	return "\"" + escaped + "\""
+	b.WriteRune('"')
+	for _, char := range jt.Value {
+		if char == '"' {
+			b.WriteString("\\\"")
+		} else {
+			b.WriteRune(char)
+		}
+	}
+	b.WriteRune('"')
 }
 
-func (jsx *JsxExpression) String() string {
+func (jsx *JsxExpression) WriteTo(b *strings.Builder) {
 	// Convertir JSX a JavaScript usando React.createElement
 	if jsx.SelfClosing || len(jsx.Children) == 0 {
 		// Elemento sin hijos: React.createElement("tagName", props)
-		return jsx.toCreateElement()
+		jsx.writeCreateElement(b)
 	} else {
 		// Elemento con hijos: React.createElement("tagName", props, ...children)
-		return jsx.toCreateElementWithChildren()
+		jsx.writeCreateElementWithChildren(b)
 	}
 }
 
-func (jsx *JsxExpression) toCreateElement() string {
-	props := jsx.attributesToProps()
-	if props == "null" {
-		return "React.createElement(\"" + jsx.TagName + "\", null)"
-	}
-	return "React.createElement(\"" + jsx.TagName + "\", " + props + ")"
+func (jsx *JsxExpression) writeCreateElement(b *strings.Builder) {
+	b.WriteString("React.createElement(\"")
+	b.WriteString(jsx.TagName)
+	b.WriteString("\", ")
+	jsx.writeAttributesToProps(b)
+	b.WriteRune(')')
 }
 
-func (jsx *JsxExpression) toCreateElementWithChildren() string {
-	props := jsx.attributesToProps()
-	children := jsx.childrenToString()
+func (jsx *JsxExpression) writeCreateElementWithChildren(b *strings.Builder) {
+	b.WriteString("React.createElement(\"")
+	b.WriteString(jsx.TagName)
+	b.WriteString("\", ")
+	jsx.writeAttributesToProps(b)
 
-	result := "React.createElement(\"" + jsx.TagName + "\", " + props
-	if children != "" {
-		result += ", " + children
+	if len(jsx.Children) > 0 {
+		b.WriteString(", ")
+		jsx.writeChildrenToString(b)
 	}
-	result += ")"
-	return result
+	b.WriteRune(')')
 }
 
-func (jsx *JsxExpression) attributesToProps() string {
+func (jsx *JsxExpression) writeAttributesToProps(b *strings.Builder) {
 	if len(jsx.Attributes) == 0 {
-		return "null"
+		b.WriteString("null")
+		return
 	}
 
-	var props []string
-	for _, attr := range jsx.Attributes {
-		props = append(props, "\""+attr.Name+"\": "+attr.Value.String())
+	b.WriteRune('{')
+	for i, attr := range jsx.Attributes {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		b.WriteRune('"')
+		b.WriteString(attr.Name)
+		b.WriteString("\": ")
+		attr.Value.WriteTo(b)
 	}
-	return "{" + strings.Join(props, ", ") + "}"
+	b.WriteRune('}')
 }
 
-func (jsx *JsxExpression) childrenToString() string {
-	if len(jsx.Children) == 0 {
-		return ""
+func (jsx *JsxExpression) writeChildrenToString(b *strings.Builder) {
+	for i, child := range jsx.Children {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		child.WriteTo(b)
 	}
-
-	var children []string
-	for _, child := range jsx.Children {
-		children = append(children, child.String())
-	}
-	return strings.Join(children, ", ")
 }
 
 func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expression {
