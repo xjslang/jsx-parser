@@ -1,16 +1,16 @@
-# JSX Parser Plugin para XJS
+# JSX Parser Plugin for XJS
 
-Este es un plugin para el transpilador XJS que añade soporte para sintaxis JSX, transformándola a llamadas `React.createElement` estándar de JavaScript.
+This is a plugin for the XJS transpiler that adds support for JSX syntax, transforming it into standard JavaScript `React.createElement` calls.
 
-## Características Implementadas
+## Implemented Features
 
-### ✅ Elementos JSX Básicos
+### ✅ Basic JSX Elements
 ```jsx
 <div>Hello, World!</div>
 // → React.createElement("div", null, "Hello,World!")
 ```
 
-### ✅ Elementos Self-Closing
+### ✅ Self-Closing Elements
 ```jsx
 <img />
 <br />
@@ -18,7 +18,7 @@ Este es un plugin para el transpilador XJS que añade soporte para sintaxis JSX,
 // → React.createElement("br", null)
 ```
 
-### ✅ Elementos Anidados
+### ✅ Nested Elements
 ```jsx
 <div>
   <span>Nested content</span>
@@ -26,13 +26,13 @@ Este es un plugin para el transpilador XJS que añade soporte para sintaxis JSX,
 // → React.createElement("div", null, React.createElement("span", null, "Nestedcontent"))
 ```
 
-### ✅ Atributos JSX
+### ✅ JSX Attributes
 ```jsx
 <div className="container" id="main">Content</div>
 // → React.createElement("div", {"className": "container", "id": "main"}, "Content")
 ```
 
-### ✅ Elementos Complejos
+### ✅ Complex Elements
 ```jsx
 <div className="main">
   <h1>Title</h1>
@@ -41,7 +41,7 @@ Este es un plugin para el transpilador XJS que añade soporte para sintaxis JSX,
 // → React.createElement("div", {"className": "main"}, React.createElement("h1", null, "Title"), React.createElement("p", null, "Paragraph"))
 ```
 
-## Uso
+## Usage
 
 ```go
 package main
@@ -55,89 +55,90 @@ import (
 func main() {
     input := `let component = <div className="app">Hello, JSX!</div>`
     
-    // Crear lexer y parser
+    // Create lexer and parser
     l := lexer.New(input)
     p := parser.New(l)
     
-    // Registrar el middleware JSX
+    // Register the JSX middleware
     p.UseExpressionHandler(jsxparser.ParseJsxExpression)
     
-    // Parsear el programa
+    // Parse the program
     ast := p.ParseProgram()
     
-    // Obtener el código JavaScript transpilado
+    // Get the transpiled JavaScript code
     output := ast.String()
     // → "let component = React.createElement("div", {"className": "app"}, "Hello,JSX!")"
 }
 ```
 
-## Ejemplos
+## Examples
 
-Para ver ejemplos detallados de uso, consulta los **Example functions** incluidos en el código:
+For detailed usage examples, check the **Example functions** included in the code:
 
 ```bash
-# Ver todos los ejemplos disponibles
+# See all available examples
 go test -run Example -v
 
-# Ejecutar un ejemplo específico
+# Run a specific example
 go test -run ExampleParseJsxExpression_nested -v
 ```
 
-Los ejemplos cubren:
-- **`ExampleParseJsxExpression`**: Uso básico
-- **`ExampleParseJsxExpression_selfClosing`**: Elementos self-closing  
-- **`ExampleParseJsxExpression_nested`**: Elementos anidados
-- **`ExampleParseJsxExpression_withAttributes`**: JSX con atributos
-- **`ExampleParseJsxExpression_complex`**: Casos complejos
+The examples cover:
+- **`ExampleParseJsxExpression`**: Basic usage
+- **`ExampleParseJsxExpression_selfClosing`**: Self-closing elements  
+- **`ExampleParseJsxExpression_nested`**: Nested elements
+- **`ExampleParseJsxExpression_withAttributes`**: JSX with attributes
+- **`ExampleParseJsxExpression_complex`**: Complex cases
 
-## Arquitectura
+## Architecture
 
-El plugin utiliza el patrón middleware de XJS:
+The plugin uses the XJS middleware pattern:
 
-1. **Middleware Pattern**: Se registra como un `ExpressionHandler` que intercepta la parsing de expresiones
-2. **Token Recognition**: Detecta la secuencia `<` + `IDENT` para iniciar el parsing JSX
-3. **Recursive Parsing**: Maneja elementos anidados recursivamente
-4. **Fallback**: Si no es JSX válido, pasa el control al parser siguiente en la cadena
+1. **Middleware Pattern**: Registers as an `ExpressionHandler` that intercepts expression parsing
+2. **Token Recognition**: Detects the `<` + `IDENT` sequence to start JSX parsing
+3. **Recursive Parsing**: Handles nested elements recursively
+4. **Fallback**: If not valid JSX, passes control to the next parser in the chain
 
-### Componentes Principales
+### Main Components
 
-- **`JsxExpression`**: Representa un elemento JSX en el AST
-- **`JsxAttribute`**: Representa un atributo de elemento JSX  
-- **`JsxText`**: Representa contenido de texto dentro de elementos JSX
-- **`ParseJsxExpression`**: Función middleware que maneja el parsing
+- **`JsxExpression`**: Represents a JSX element in the AST
+- **`JsxAttribute`**: Represents a JSX element attribute  
+- **`JsxText`**: Represents text content inside JSX elements
+- **`ParseJsxExpression`**: Middleware function that handles parsing
 
-## Limitaciones Actuales
+## Current Limitations
 
-- **Expresiones JavaScript**: No soporta `{expresion}` dentro de JSX
-- **Fragmentos**: No soporta `<>...</>` (React Fragments)
-- **Componentes**: Solo soporta elementos HTML nativos (tags en minúsculas)
-- **Atributos complejos**: Solo soporta atributos con valores string literales
+- **JavaScript Expressions**: Does not support `{expression}` inside JSX
+- **Fragments**: Does not support `<>...</>` (React Fragments)
+- **Components**: Only supports native HTML elements (lowercase tags)
+- **Complex Attributes**: Only supports attributes with string literal values
 
-## Próximas Características
+## Upcoming Features
 
-- [ ] Soporte para expresiones JavaScript `{variable}`
+- [ ] Support for JavaScript expressions `{variable}`
 - [ ] React Fragments `<>...</>`
-- [ ] Componentes React (PascalCase)
-- [ ] Atributos con expresiones complejas
-- [ ] Validación de nombres de tags HTML
-- [ ] Mejor manejo de espacios en blanco en texto
+- [ ] React Components (PascalCase)
+- [ ] Attributes with complex expressions
+- [ ] HTML tag name validation
+- [ ] Better whitespace handling in text
 
 ## Testing
 
 ```bash
-# Ejecutar todos los tests
+# Run all tests
 go test -v
 
-# Ejecutar solo los tests unitarios
+# Run only unit tests
 go test -run TestJsxParser -v
 
-# Ejecutar solo los ejemplos
+# Run only examples
 go test -run Example -v
 
-# Ver documentación con ejemplos
+# View documentation with examples
 go doc .
 ```
 
-El plugin incluye:
-- **Tests unitarios comprehensivos** que cubren todos los casos de uso
-- **Example functions** que sirven como documentación ejecutable y ejemplos de uso
+The plugin includes:
+- **Comprehensive unit tests** covering all use cases
+- **Example functions** serving as executable documentation and usage examples
+

@@ -8,29 +8,29 @@ import (
 	"github.com/xjslang/xjs/token"
 )
 
-// JsxExpression representa un elemento JSX
+// JsxExpression represents a JSX element
 type JsxExpression struct {
-	Token       token.Token      // el token '<'
-	TagName     string           // nombre del tag (ej: "div", "span")
-	Attributes  []JsxAttribute   // atributos del elemento
-	Children    []ast.Expression // contenido hijo (texto o otros elementos JSX)
-	SelfClosing bool             // true si es self-closing como <img />
+	Token       token.Token      // the '<' token
+	TagName     string           // tag name (e.g., "div", "span")
+	Attributes  []JsxAttribute   // element attributes
+	Children    []ast.Expression // child content (text or other JSX elements)
+	SelfClosing bool             // true if self-closing like <img />
 }
 
-// JsxAttribute representa un atributo de un elemento JSX
+// JsxAttribute represents an attribute of a JSX element
 type JsxAttribute struct {
-	Name  string         // nombre del atributo
-	Value ast.Expression // valor del atributo (puede ser string o expresión)
+	Name  string         // attribute name
+	Value ast.Expression // attribute value (can be string or expression)
 }
 
-// JsxText representa texto dentro de un elemento JSX
+// JsxText represents text inside a JSX element
 type JsxText struct {
 	Token token.Token
 	Value string
 }
 
 func (jt *JsxText) WriteTo(b *strings.Builder) {
-	// Escapar comillas en el texto
+	// Escape quotes in the text
 	b.WriteRune('"')
 	for _, char := range jt.Value {
 		if char == '"' {
@@ -43,12 +43,12 @@ func (jt *JsxText) WriteTo(b *strings.Builder) {
 }
 
 func (jsx *JsxExpression) WriteTo(b *strings.Builder) {
-	// Convertir JSX a JavaScript usando React.createElement
+	// Convert JSX to JavaScript using React.createElement
 	if jsx.SelfClosing || len(jsx.Children) == 0 {
-		// Elemento sin hijos: React.createElement("tagName", props)
+		// Element without children: React.createElement("tagName", props)
 		jsx.writeCreateElement(b)
 	} else {
-		// Elemento con hijos: React.createElement("tagName", props, ...children)
+		// Element with children: React.createElement("tagName", props, ...children)
 		jsx.writeCreateElementWithChildren(b)
 	}
 }
@@ -103,7 +103,7 @@ func (jsx *JsxExpression) writeChildrenToString(b *strings.Builder) {
 }
 
 func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expression {
-	// Solo procesar si encontramos '<' seguido de un identificador
+	// Only process if we find '<' followed by an identifier
 	if p.CurrentToken.Type != token.LT || p.PeekToken.Type != token.IDENT {
 		return next()
 	}
@@ -114,32 +114,32 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 		Children:   []ast.Expression{},
 	}
 
-	// Consumir '<'
+	// Consume '<'
 	p.NextToken()
 
-	// Obtener el nombre del tag
+	// Get the tag name
 	jsx.TagName = p.CurrentToken.Literal
 	p.NextToken()
 
-	// Procesar atributos
+	// Process attributes
 	for p.CurrentToken.Type == token.IDENT {
 		attr := JsxAttribute{
 			Name: p.CurrentToken.Literal,
 		}
 		p.NextToken()
 
-		// Verificar si tiene valor (atributo="valor")
+		// Check if it has a value (attribute="value")
 		if p.CurrentToken.Type == token.ASSIGN {
 			p.NextToken()
 			if p.CurrentToken.Type == token.STRING {
-				// Valor de atributo como string literal
+				// Attribute value as string literal
 				attr.Value = &ast.StringLiteral{
 					Token: p.CurrentToken,
 					Value: p.CurrentToken.Literal,
 				}
 				p.NextToken()
 			} else {
-				// Por simplicidad, tratamos otros valores como strings
+				// For simplicity, treat other values as strings
 				attr.Value = &ast.StringLiteral{
 					Token: p.CurrentToken,
 					Value: p.CurrentToken.Literal,
@@ -147,7 +147,7 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 				p.NextToken()
 			}
 		} else {
-			// Atributo booleano sin valor (ej: disabled)
+			// Boolean attribute without value (e.g., disabled)
 			attr.Value = &ast.BooleanLiteral{
 				Token: token.Token{Type: token.TRUE, Literal: "true"},
 				Value: true,
@@ -157,7 +157,7 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 		jsx.Attributes = append(jsx.Attributes, attr)
 	}
 
-	// Verificar si es self-closing
+	// Check if self-closing
 	if p.CurrentToken.Type == token.DIVIDE && p.PeekToken.Type == token.GT {
 		jsx.SelfClosing = true
 		p.NextToken() // consume '/'
@@ -165,20 +165,20 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 		return jsx
 	}
 
-	// Consumir '>' de apertura
+	// Consume opening '>'
 	if p.CurrentToken.Type != token.GT {
 		p.AddError("expected '>' after tag name")
 		return nil
 	}
 	p.NextToken()
 
-	// Procesar contenido hasta encontrar el tag de cierre
+	// Process content until finding the closing tag
 	var textBuffer []string
 
 	for p.CurrentToken.Type != token.EOF {
-		// Verificar si es el inicio de un tag de cierre
+		// Check if it's the start of a closing tag
 		if p.CurrentToken.Type == token.LT && p.PeekToken.Type == token.DIVIDE {
-			// Si tenemos texto acumulado, agregarlo como un nodo de texto
+			// If we have accumulated text, add it as a text node
 			if len(textBuffer) > 0 {
 				text := &JsxText{
 					Token: p.CurrentToken,
@@ -187,11 +187,11 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 				jsx.Children = append(jsx.Children, text)
 			}
 
-			// Consumir '</'
+			// Consume '</'
 			p.NextToken()
 			p.NextToken()
 
-			// Verificar que el nombre del tag de cierre coincida
+			// Check that the closing tag name matches
 			if p.CurrentToken.Type == token.IDENT && p.CurrentToken.Literal == jsx.TagName {
 				p.NextToken() // consume tag name
 				if p.CurrentToken.Type == token.GT {
@@ -203,9 +203,9 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 			return nil
 		}
 
-		// Si encontramos otro elemento JSX anidado
+		// If we find another nested JSX element
 		if p.CurrentToken.Type == token.LT && p.PeekToken.Type == token.IDENT {
-			// Si tenemos texto acumulado, agregarlo antes del elemento JSX
+			// If we have accumulated text, add it before the JSX element
 			if len(textBuffer) > 0 {
 				text := &JsxText{
 					Token: p.CurrentToken,
@@ -222,7 +222,7 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 			continue
 		}
 
-		// Acumular texto (identificadores, strings, signos de puntuación, espacios)
+		// Accumulate text (identifiers, strings, punctuation, spaces)
 		if p.CurrentToken.Literal != "" &&
 			p.CurrentToken.Type != token.LT &&
 			p.CurrentToken.Type != token.GT {
