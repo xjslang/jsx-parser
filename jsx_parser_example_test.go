@@ -17,7 +17,7 @@ func ExampleParseJsxExpression() {
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
-	// Output: let greeting = React.createElement("h1", null, "Hello,World!")
+	// Output: let greeting=React.createElement("h1", null, "Hello,World!")
 }
 
 // ExampleParseJsxExpression_selfClosing demonstrates self-closing elements
@@ -30,7 +30,7 @@ func ExampleParseJsxExpression_selfClosing() {
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
-	// Output: let image = React.createElement("img", {"src": "photo.jpg", "alt": "A photo"})
+	// Output: let image=React.createElement("img", {"src": "photo.jpg", "alt": "A photo"})
 }
 
 // ExampleParseJsxExpression_nested demonstrates nested JSX elements
@@ -43,7 +43,7 @@ func ExampleParseJsxExpression_nested() {
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
-	// Output: let card = React.createElement("div", null, React.createElement("span", null, "Nested"))
+	// Output: let card=React.createElement("div", null, React.createElement("span", null, "Nested"))
 }
 
 // ExampleParseJsxExpression_withAttributes demonstrates JSX with attributes
@@ -56,7 +56,7 @@ func ExampleParseJsxExpression_withAttributes() {
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
-	// Output: let container = React.createElement("div", {"className": "main", "id": "app"}, "Content")
+	// Output: let container=React.createElement("div", {"className": "main", "id": "app"}, "Content")
 }
 
 // ExampleParseJsxExpression_complex demonstrates complex nested JSX with attributes
@@ -69,5 +69,5 @@ func ExampleParseJsxExpression_complex() {
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
-	// Output: let app = React.createElement("div", {"className": "app"}, React.createElement("header", null, React.createElement("h1", null, "Title")), React.createElement("main", null, React.createElement("p", null, "Content")))
+	// Output: let app=React.createElement("div", {"className": "app"}, React.createElement("header", null, React.createElement("h1", null, "Title")), React.createElement("main", null, React.createElement("p", null, "Content")))
 }

@@ -16,27 +16,27 @@ func TestJsxParser(t *testing.T) {
 		{
 			name:     "Basic JSX element",
 			input:    `let x = <div>Hello, World!</div>`,
-			expected: `let x = React.createElement("div", null, "Hello,World!")`,
+			expected: `let x=React.createElement("div", null, "Hello,World!")`,
 		},
 		{
 			name:     "Self-closing element",
 			input:    `let y = <img />`,
-			expected: `let y = React.createElement("img", null)`,
+			expected: `let y=React.createElement("img", null)`,
 		},
 		{
 			name:     "Nested elements",
 			input:    `let z = <div><span>Nested</span></div>`,
-			expected: `let z = React.createElement("div", null, React.createElement("span", null, "Nested"))`,
+			expected: `let z=React.createElement("div", null, React.createElement("span", null, "Nested"))`,
 		},
 		{
 			name:     "Element with attributes",
 			input:    `let w = <div className="container">Content</div>`,
-			expected: `let w = React.createElement("div", {"className": "container"}, "Content")`,
+			expected: `let w=React.createElement("div", {"className": "container"}, "Content")`,
 		},
 		{
 			name:     "Complex nested with attributes",
 			input:    `let complex = <div className="main"><h1>Title</h1><p>Paragraph</p></div>`,
-			expected: `let complex = React.createElement("div", {"className": "main"}, React.createElement("h1", null, "Title"), React.createElement("p", null, "Paragraph"))`,
+			expected: `let complex=React.createElement("div", {"className": "main"}, React.createElement("h1", null, "Title"), React.createElement("p", null, "Paragraph"))`,
 		},
 	}
 
