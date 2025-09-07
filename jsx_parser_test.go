@@ -44,7 +44,7 @@ func TestJsxParser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			l := lexer.New(tt.input)
 			p := parser.New(l)
-			p.UseExpressionHandler(ParseJsxExpression)
+			p.UseExpressionParser(ParseJsxExpression)
 			ast := p.ParseProgram()
 			result := ast.String()
 

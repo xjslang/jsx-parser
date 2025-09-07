@@ -13,7 +13,7 @@ func ExampleParseJsxExpression() {
 
 	l := lexer.New(input)
 	p := parser.New(l)
-	p.UseExpressionHandler(ParseJsxExpression)
+	p.UseExpressionParser(ParseJsxExpression)
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
@@ -26,7 +26,7 @@ func ExampleParseJsxExpression_selfClosing() {
 
 	l := lexer.New(input)
 	p := parser.New(l)
-	p.UseExpressionHandler(ParseJsxExpression)
+	p.UseExpressionParser(ParseJsxExpression)
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
@@ -39,7 +39,7 @@ func ExampleParseJsxExpression_nested() {
 
 	l := lexer.New(input)
 	p := parser.New(l)
-	p.UseExpressionHandler(ParseJsxExpression)
+	p.UseExpressionParser(ParseJsxExpression)
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
@@ -52,7 +52,7 @@ func ExampleParseJsxExpression_withAttributes() {
 
 	l := lexer.New(input)
 	p := parser.New(l)
-	p.UseExpressionHandler(ParseJsxExpression)
+	p.UseExpressionParser(ParseJsxExpression)
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
@@ -65,7 +65,7 @@ func ExampleParseJsxExpression_complex() {
 
 	l := lexer.New(input)
 	p := parser.New(l)
-	p.UseExpressionHandler(ParseJsxExpression)
+	p.UseExpressionParser(ParseJsxExpression)
 	ast := p.ParseProgram()
 
 	fmt.Println(ast.String())
