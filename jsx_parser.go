@@ -102,10 +102,10 @@ func (jsx *JsxExpression) writeChildrenToString(b *strings.Builder) {
 	}
 }
 
-func ParseJsxExpression(p *parser.Parser, next func(left ast.Expression) ast.Expression) ast.Expression {
+func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expression {
 	// Only process if we find '<' followed by an identifier
 	if p.CurrentToken.Type != token.LT || p.PeekToken.Type != token.IDENT {
-		return next(nil)
+		return next()
 	}
 
 	jsx := &JsxExpression{
