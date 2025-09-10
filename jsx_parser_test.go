@@ -45,7 +45,10 @@ func TestJsxParser(t *testing.T) {
 			l := lexer.New(tt.input)
 			p := parser.New(l)
 			p.UseExpressionParser(ParseJsxExpression)
-			ast := p.ParseProgram()
+			ast, err := p.ParseProgram()
+			if err != nil {
+				t.Fatalf("ParseProgram() error: %v", err)
+			}
 			result := ast.String()
 
 			if result != tt.expected {

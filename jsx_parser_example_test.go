@@ -14,7 +14,10 @@ func ExampleParseJsxExpression() {
 	l := lexer.New(input)
 	p := parser.New(l)
 	p.UseExpressionParser(ParseJsxExpression)
-	ast := p.ParseProgram()
+	ast, err := p.ParseProgram()
+	if err != nil {
+		panic(fmt.Sprintf("ParseProgram() error: %v\n", err))
+	}
 
 	fmt.Println(ast.String())
 	// Output: let greeting=React.createElement("h1", null, "Hello,World!")
@@ -27,7 +30,10 @@ func ExampleParseJsxExpression_selfClosing() {
 	l := lexer.New(input)
 	p := parser.New(l)
 	p.UseExpressionParser(ParseJsxExpression)
-	ast := p.ParseProgram()
+	ast, err := p.ParseProgram()
+	if err != nil {
+		panic(fmt.Sprintf("ParseProgram() error: %v\n", err))
+	}
 
 	fmt.Println(ast.String())
 	// Output: let image=React.createElement("img", {"src": "photo.jpg", "alt": "A photo"})
@@ -40,7 +46,10 @@ func ExampleParseJsxExpression_nested() {
 	l := lexer.New(input)
 	p := parser.New(l)
 	p.UseExpressionParser(ParseJsxExpression)
-	ast := p.ParseProgram()
+	ast, err := p.ParseProgram()
+	if err != nil {
+		panic(fmt.Sprintf("ParseProgram() error: %v\n", err))
+	}
 
 	fmt.Println(ast.String())
 	// Output: let card=React.createElement("div", null, React.createElement("span", null, "Nested"))
@@ -53,7 +62,10 @@ func ExampleParseJsxExpression_withAttributes() {
 	l := lexer.New(input)
 	p := parser.New(l)
 	p.UseExpressionParser(ParseJsxExpression)
-	ast := p.ParseProgram()
+	ast, err := p.ParseProgram()
+	if err != nil {
+		panic(fmt.Sprintf("ParseProgram() error: %v\n", err))
+	}
 
 	fmt.Println(ast.String())
 	// Output: let container=React.createElement("div", {"className": "main", "id": "app"}, "Content")
@@ -66,7 +78,10 @@ func ExampleParseJsxExpression_complex() {
 	l := lexer.New(input)
 	p := parser.New(l)
 	p.UseExpressionParser(ParseJsxExpression)
-	ast := p.ParseProgram()
+	ast, err := p.ParseProgram()
+	if err != nil {
+		panic(fmt.Sprintf("ParseProgram() error: %v\n", err))
+	}
 
 	fmt.Println(ast.String())
 	// Output: let app=React.createElement("div", {"className": "app"}, React.createElement("header", null, React.createElement("h1", null, "Title")), React.createElement("main", null, React.createElement("p", null, "Content")))
