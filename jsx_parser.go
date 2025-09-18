@@ -29,10 +29,9 @@ type JSXText struct {
 	Value string
 }
 
-func (jt *JSXText) WriteTo(b *strings.Builder) {
-	// Escape quotes in the text
+func (jsx *JSXText) WriteTo(b *strings.Builder) {
 	b.WriteRune('"')
-	for _, char := range jt.Value {
+	for _, char := range jsx.Value {
 		if char == '"' {
 			b.WriteString("\\\"")
 		} else {
@@ -43,12 +42,9 @@ func (jt *JSXText) WriteTo(b *strings.Builder) {
 }
 
 func (jsx *JSXExpression) WriteTo(b *strings.Builder) {
-	// Convert JSX to JavaScript using React.createElement
 	if jsx.SelfClosing || len(jsx.Children) == 0 {
-		// Element without children: React.createElement("tagName", props)
 		jsx.writeCreateElement(b)
 	} else {
-		// Element with children: React.createElement("tagName", props, ...children)
 		jsx.writeCreateElementWithChildren(b)
 	}
 }
@@ -66,7 +62,6 @@ func (jsx *JSXExpression) writeCreateElementWithChildren(b *strings.Builder) {
 	b.WriteString(jsx.TagName)
 	b.WriteString("\", ")
 	jsx.writeAttributesToProps(b)
-
 	if len(jsx.Children) > 0 {
 		b.WriteString(", ")
 		jsx.writeChildrenToString(b)
@@ -232,4 +227,137 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 	}
 
 	return jsx
+}
+
+func Plugin(pb *parser.Builder) {
+	pb.UseExpressionInterceptor(func(p *parser.Parser, next func() ast.Expression) ast.Expression {
+		// Only process if we find '<' followed by an identifier
+		if p.CurrentToken.Type != token.LT || p.PeekToken.Type != token.IDENT {
+			return next()
+		}
+		jsx := &JSXExpression{
+			Token:      p.CurrentToken,
+			Attributes: []JSXAttribute{},
+			Children:   []ast.Expression{},
+		}
+
+		// Consume '<'
+		p.NextToken()
+
+		// Get the tag name
+		jsx.TagName = p.CurrentToken.Literal
+		p.NextToken()
+
+		// Process attributes
+		for p.CurrentToken.Type == token.IDENT {
+			attr := JSXAttribute{
+				Name: p.CurrentToken.Literal,
+			}
+			p.NextToken()
+
+			// Check if it has a value (attribute="value")
+			if p.CurrentToken.Type == token.ASSIGN {
+				p.NextToken()
+				if p.CurrentToken.Type == token.STRING {
+					// Attribute value as string literal
+					attr.Value = &ast.StringLiteral{
+						Token: p.CurrentToken,
+						Value: p.CurrentToken.Literal,
+					}
+					p.NextToken()
+				} else {
+					// For simplicity, treat other values as strings
+					attr.Value = &ast.StringLiteral{
+						Token: p.CurrentToken,
+						Value: p.CurrentToken.Literal,
+					}
+					p.NextToken()
+				}
+			} else {
+				// Boolean attribute without value (e.g., disabled)
+				attr.Value = &ast.BooleanLiteral{
+					Token: token.Token{Type: token.TRUE, Literal: "true"},
+					Value: true,
+				}
+			}
+
+			jsx.Attributes = append(jsx.Attributes, attr)
+		}
+
+		// Check if self-closing
+		if p.CurrentToken.Type == token.DIVIDE && p.PeekToken.Type == token.GT {
+			jsx.SelfClosing = true
+			p.NextToken() // consume '/'
+			p.NextToken() // consume '>'
+			return jsx
+		}
+
+		// Consume opening '>'
+		if p.CurrentToken.Type != token.GT {
+			p.AddError("expected '>' after tag name")
+			return nil
+		}
+		p.NextToken()
+
+		// Process content until finding the closing tag
+		var textBuffer []string
+
+		for p.CurrentToken.Type != token.EOF {
+			// Check if it's the start of a closing tag
+			if p.CurrentToken.Type == token.LT && p.PeekToken.Type == token.DIVIDE {
+				// If we have accumulated text, add it as a text node
+				if len(textBuffer) > 0 {
+					text := &JSXText{
+						Token: p.CurrentToken,
+						Value: strings.Join(textBuffer, ""),
+					}
+					jsx.Children = append(jsx.Children, text)
+				}
+
+				// Consume '</'
+				p.NextToken()
+				p.NextToken()
+
+				// Check that the closing tag name matches
+				if p.CurrentToken.Type == token.IDENT && p.CurrentToken.Literal == jsx.TagName {
+					p.NextToken() // consume tag name
+					if p.CurrentToken.Type == token.GT {
+						p.NextToken() // consume '>'
+						break
+					}
+				}
+				p.AddError("malformed closing tag")
+				return nil
+			}
+
+			// If we find another nested JSX element
+			if p.CurrentToken.Type == token.LT && p.PeekToken.Type == token.IDENT {
+				// If we have accumulated text, add it before the JSX element
+				if len(textBuffer) > 0 {
+					text := &JSXText{
+						Token: p.CurrentToken,
+						Value: strings.Join(textBuffer, ""),
+					}
+					jsx.Children = append(jsx.Children, text)
+					textBuffer = textBuffer[:0] // clear buffer
+				}
+
+				child := ParseJsxExpression(p, next)
+				if child != nil {
+					jsx.Children = append(jsx.Children, child)
+				}
+				continue
+			}
+
+			// Accumulate text (identifiers, strings, punctuation, spaces)
+			if p.CurrentToken.Literal != "" &&
+				p.CurrentToken.Type != token.LT &&
+				p.CurrentToken.Type != token.GT {
+				textBuffer = append(textBuffer, p.CurrentToken.Literal)
+			}
+			p.NextToken()
+		}
+
+		return jsx
+	})
 }
