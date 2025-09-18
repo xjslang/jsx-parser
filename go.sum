@@ -2,3 +2,5 @@ github.com/magefile/mage v1.15.0 h1:BvGheCMAsG3bWUDbZ8AyXXpCNwU9u5CB6sM+HNb9HYg=
 github.com/magefile/mage v1.15.0/go.mod h1:z5UZb/iS3GoOSn0JgWuiw7dxlurVYTu+/jHXqQg881A=
 github.com/xjslang/xjs v0.0.0-20250904225226-4cbe4a4efdcb h1:7XWa+Lf5Mi+NNjznYfdWmBItEuSWxbpV/YK+RnwPdvE=
 github.com/xjslang/xjs v0.0.0-20250904225226-4cbe4a4efdcb/go.mod h1:sCMCA7n2l9RRLOtvbPBlzMIQade2Zxq6vSqIFwcY6/8=
+github.com/xjslang/xjs v0.0.0-20250918175054-a5da9382c843 h1:P2dHFyMQU9EFzAigHbZFnfRWQa36BmNW0H4UdAoArE8=
+github.com/xjslang/xjs v0.0.0-20250918175054-a5da9382c843/go.mod h1:sCMCA7n2l9RRLOtvbPBlzMIQade2Zxq6vSqIFwcY6/8=
