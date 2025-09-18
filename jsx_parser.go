@@ -8,28 +8,28 @@ import (
 	"github.com/xjslang/xjs/token"
 )
 
-// JsxExpression represents a JSX element
-type JsxExpression struct {
+// JSXExpression represents a JSX element
+type JSXExpression struct {
 	Token       token.Token      // the '<' token
 	TagName     string           // tag name (e.g., "div", "span")
-	Attributes  []JsxAttribute   // element attributes
+	Attributes  []JSXAttribute   // element attributes
 	Children    []ast.Expression // child content (text or other JSX elements)
 	SelfClosing bool             // true if self-closing like <img />
 }
 
-// JsxAttribute represents an attribute of a JSX element
-type JsxAttribute struct {
+// JSXAttribute represents an attribute of a JSX element
+type JSXAttribute struct {
 	Name  string         // attribute name
 	Value ast.Expression // attribute value (can be string or expression)
 }
 
-// JsxText represents text inside a JSX element
-type JsxText struct {
+// JSXText represents text inside a JSX element
+type JSXText struct {
 	Token token.Token
 	Value string
 }
 
-func (jt *JsxText) WriteTo(b *strings.Builder) {
+func (jt *JSXText) WriteTo(b *strings.Builder) {
 	// Escape quotes in the text
 	b.WriteRune('"')
 	for _, char := range jt.Value {
@@ -42,7 +42,7 @@ func (jt *JsxText) WriteTo(b *strings.Builder) {
 	b.WriteRune('"')
 }
 
-func (jsx *JsxExpression) WriteTo(b *strings.Builder) {
+func (jsx *JSXExpression) WriteTo(b *strings.Builder) {
 	// Convert JSX to JavaScript using React.createElement
 	if jsx.SelfClosing || len(jsx.Children) == 0 {
 		// Element without children: React.createElement("tagName", props)
@@ -53,7 +53,7 @@ func (jsx *JsxExpression) WriteTo(b *strings.Builder) {
 	}
 }
 
-func (jsx *JsxExpression) writeCreateElement(b *strings.Builder) {
+func (jsx *JSXExpression) writeCreateElement(b *strings.Builder) {
 	b.WriteString("React.createElement(\"")
 	b.WriteString(jsx.TagName)
 	b.WriteString("\", ")
@@ -61,7 +61,7 @@ func (jsx *JsxExpression) writeCreateElement(b *strings.Builder) {
 	b.WriteRune(')')
 }
 
-func (jsx *JsxExpression) writeCreateElementWithChildren(b *strings.Builder) {
+func (jsx *JSXExpression) writeCreateElementWithChildren(b *strings.Builder) {
 	b.WriteString("React.createElement(\"")
 	b.WriteString(jsx.TagName)
 	b.WriteString("\", ")
@@ -74,7 +74,7 @@ func (jsx *JsxExpression) writeCreateElementWithChildren(b *strings.Builder) {
 	b.WriteRune(')')
 }
 
-func (jsx *JsxExpression) writeAttributesToProps(b *strings.Builder) {
+func (jsx *JSXExpression) writeAttributesToProps(b *strings.Builder) {
 	if len(jsx.Attributes) == 0 {
 		b.WriteString("null")
 		return
@@ -93,7 +93,7 @@ func (jsx *JsxExpression) writeAttributesToProps(b *strings.Builder) {
 	b.WriteRune('}')
 }
 
-func (jsx *JsxExpression) writeChildrenToString(b *strings.Builder) {
+func (jsx *JSXExpression) writeChildrenToString(b *strings.Builder) {
 	for i, child := range jsx.Children {
 		if i > 0 {
 			b.WriteString(", ")
@@ -108,9 +108,9 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 		return next()
 	}
 
-	jsx := &JsxExpression{
+	jsx := &JSXExpression{
 		Token:      p.CurrentToken,
-		Attributes: []JsxAttribute{},
+		Attributes: []JSXAttribute{},
 		Children:   []ast.Expression{},
 	}
 
@@ -123,7 +123,7 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 
 	// Process attributes
 	for p.CurrentToken.Type == token.IDENT {
-		attr := JsxAttribute{
+		attr := JSXAttribute{
 			Name: p.CurrentToken.Literal,
 		}
 		p.NextToken()
@@ -180,7 +180,7 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 		if p.CurrentToken.Type == token.LT && p.PeekToken.Type == token.DIVIDE {
 			// If we have accumulated text, add it as a text node
 			if len(textBuffer) > 0 {
-				text := &JsxText{
+				text := &JSXText{
 					Token: p.CurrentToken,
 					Value: strings.Join(textBuffer, ""),
 				}
@@ -207,7 +207,7 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 		if p.CurrentToken.Type == token.LT && p.PeekToken.Type == token.IDENT {
 			// If we have accumulated text, add it before the JSX element
 			if len(textBuffer) > 0 {
-				text := &JsxText{
+				text := &JSXText{
 					Token: p.CurrentToken,
 					Value: strings.Join(textBuffer, ""),
 				}
@@ -215,9 +215,9 @@ func ParseJsxExpression(p *parser.Parser, next func() ast.Expression) ast.Expres
 				textBuffer = textBuffer[:0] // clear buffer
 			}
 
-			childJsx := ParseJsxExpression(p, next)
-			if childJsx != nil {
-				jsx.Children = append(jsx.Children, childJsx)
+			child := ParseJsxExpression(p, next)
+			if child != nil {
+				jsx.Children = append(jsx.Children, child)
 			}
 			continue
 		}
